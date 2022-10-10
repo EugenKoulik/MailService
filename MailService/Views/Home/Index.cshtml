@@ -1,0 +1,103 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container">
+    <div class="row mb-3">
+        <h2 class="text-center">Email sending</h2>
+    </div>
+    <div class="row mb-3">
+        <div class="col">
+            <h5 class="text-center">Recipients</h5>
+        </div>
+        <div class="col">
+            <h5 class="text-center">Message</h5>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col">
+            <div class="form-group">
+                <input type="email" class="form-control mb-2" id="newText">
+                <button class="mb-2 btn btn-light" type="button" onclick="AddRecipient()">Add recipient</button>
+            </div>
+            <div id="recipientsEl" class="text-lg-start mt-2 mb-2"></div>
+        </div>
+        <div class="col">
+            <div class="form-outline pb-2">
+                <textarea class="form-control" id="subjectArea" rows="1" placeholder="subject..."></textarea>
+            </div>
+            <div class="form-outline pb-2">
+                <textarea class="form-control" id="bodyArea" rows="3" placeholder="message text..."></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="row pb-3">
+        <button class="btn btn-light" onclick="SendMails()">Send emails</button>
+    </div>
+    <div class="row pb-3">
+        <button class="btn btn-light" onclick="GetMails()">Get emails list</button>
+    </div>
+    <div class="row pb-3">
+        <div id="show-elements">
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    function AddRecipient() {
+        let text = document.getElementById("newText").value;
+        let recipient = document.createElement("li");
+        recipient.textContent = text;
+        recipient.className = "listItem";
+        recipient.lang = text;
+        let span = document.createElement("span");
+        span.innerHTML = " <a href = '#'> Delete</a>";
+        span.addEventListener("click", function () {
+           let li = span.parentNode;
+           li.parentNode.removeChild(li);
+        });
+        recipient.appendChild(span);                                      
+        let items = document.getElementById("recipientsEl");
+        items.appendChild(recipient);                    
+        document.getElementById("newText").value = "";
+    }
+    function SendMails() {
+        let recipientsEl = document.getElementsByClassName("listItem");
+        let recipients = [];
+        let body = document.getElementById("bodyArea").value;
+        let subject = document.getElementById("subjectArea").value;
+              
+        for (let i = 0; i < recipientsEl.length; i++){       
+            recipients.push(recipientsEl[i].lang);                
+        }  
+        
+        var jContent = {
+            "subject" : subject,
+            "body" : body,
+            "recipients" : recipients,
+        };
+        
+        $.ajax({
+            url: "/Api/Mails",
+            dataType: "json",
+            data: JSON.stringify(jContent),
+            type: "POST",
+            contentType: "application/json",
+        });
+    }
+    function GetMails() {    
+        $.ajax({        
+            type: 'GET',        
+            url: '/Api/Mails',
+            dataType: 'json',  
+            traditional: true,     
+            success: function (data) {
+                let results = data;            
+            },        
+            error: function (data) {
+                alert("Data fetch error!");
+            }
+        })
+    }
+</script>
